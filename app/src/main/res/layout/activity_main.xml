@@ -12,22 +12,19 @@
     <EditText
         android:id="@+id/edit_input"
         android:layout_width="match_parent"
-        android:layout_height="40dp" />
+        android:layout_height="50dp" />
 
     <Button
         android:layout_below="@+id/edit_input"
         android:id="@+id/edit_btn"
         android:text="search"
         android:layout_width="match_parent"
-        android:layout_height="40dp" />
+        android:layout_height="50dp" />
 
-    <TextView
+    <android.support.v7.widget.RecyclerView
         android:layout_below="@+id/edit_btn"
+        android:layout_marginTop="10dp"
         android:id="@+id/edit_result"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:textColor="#ff0000"
-        android:text="123456"
-        />
+        android:layout_height="wrap_content"></android.support.v7.widget.RecyclerView>
 </RelativeLayout>
