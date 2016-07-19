@@ -2,6 +2,7 @@ package xyf.com.appframe.recycleviewtools;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.support.v7.widget.LinearLayoutManager;
@@ -31,6 +32,7 @@ public class itemDecoration extends RecyclerView.ItemDecoration {
 
         itemsize = (int) TypedValue.applyDimension(itemsize,TypedValue.COMPLEX_UNIT_DIP,m.getResources().getDisplayMetrics());
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mPaint.setColor(Color.LTGRAY);
         mPaint.setStyle(Paint.Style.FILL);
     }
 

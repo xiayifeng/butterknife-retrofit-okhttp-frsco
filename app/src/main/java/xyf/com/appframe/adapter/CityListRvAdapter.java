@@ -8,16 +8,18 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import xyf.com.appframe.R;
 import xyf.com.appframe.javabean.City;
+import xyf.com.appframe.recycleviewtools.RecycleViewListener;
 
 /**
  * Created by sh-xiayf on 16/7/18.
  */
-public class CityListRvAdapter extends RecyclerView.Adapter {
+public class CityListRvAdapter extends RecyclerView.Adapter{
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -31,11 +33,12 @@ public class CityListRvAdapter extends RecyclerView.Adapter {
         cityViewHolder.cityname.setText(tmp.name_cn);
     }
 
-    List<City> cities;
+    List<City> cities = new ArrayList<City>();
 
     public void setCities(List<City> citiess)
     {
-        this.cities = citiess;
+        clear();
+        this.cities.addAll(citiess);
         notifyItemRangeInserted(0,citiess.size());
     }
 
@@ -67,8 +70,18 @@ public class CityListRvAdapter extends RecyclerView.Adapter {
         return cities == null ? 0 : cities.size();
     }
 
+    public Object getItem(int position)
+    {
+        return cities == null ? null : cities.size() < position ? null : cities.get(position);
+    }
 
-    protected class CityViewHolder extends RecyclerView.ViewHolder{
+    private RecycleViewListener callback;
+
+    public void setCallback(RecycleViewListener callback) {
+        this.callback = callback;
+    }
+
+    protected class CityViewHolder extends RecyclerView.ViewHolder implements RecyclerView.OnClickListener,RecyclerView.OnLongClickListener{
 
         @BindView(R.id.item_rv_citylist_name)
         TextView cityname;
@@ -76,6 +89,25 @@ public class CityListRvAdapter extends RecyclerView.Adapter {
         public CityViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this,itemView);
+            itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (callback != null)
+            {
+                callback.OnItemClickListener(v,getAdapterPosition());
+            }
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            if (callback != null)
+            {
+                callback.OnItemLongClickListener(v, getAdapterPosition());
+            }
+            return true;
         }
     }
 
