@@ -21,7 +21,9 @@ import xyf.com.appframe.adapter.CityListRvAdapter;
 import xyf.com.appframe.javabean.City;
 import xyf.com.appframe.javabean.CityListBean;
 import xyf.com.appframe.network.NetWork;
+import xyf.com.appframe.recycleviewtools.ProgressDialogUtils;
 import xyf.com.appframe.recycleviewtools.RecycleViewListener;
+import xyf.com.appframe.recycleviewtools.SoftInputUtils;
 import xyf.com.appframe.recycleviewtools.itemDecoration;
 
 public class MainActivity extends AppCompatActivity implements RecycleViewListener{
@@ -39,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements RecycleViewListen
         {
             mSubscription.unsubscribe();
         }
+        SoftInputUtils.hideSoftInput(this);
+        ProgressDialogUtils.showProgress(MainActivity.this);
         mSubscription = NetWork.getClitListApi().getcitylist(input.getText().toString()).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(observer);
@@ -60,13 +64,13 @@ public class MainActivity extends AppCompatActivity implements RecycleViewListen
         result.setAdapter(adapter);
         adapter.setCallback(this);
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setTitle("搜索天气城市列表");
     }
 
     Observer<CityListBean> observer = new Observer<CityListBean>() {
         @Override
         public void onCompleted() {
-
+            ProgressDialogUtils.dismissProgress(MainActivity.this);
         }
 
         @Override
@@ -78,8 +82,8 @@ public class MainActivity extends AppCompatActivity implements RecycleViewListen
         public void onNext(CityListBean cityListBean) {
             if (cityListBean.errNum == 0)
             {
-                Toast.makeText(MainActivity.this, cityListBean.errMsg, Toast.LENGTH_SHORT).show();
                 adapter.setCities(cityListBean.retData);
+                setTitle(input.getText().toString().trim());
             }
             else
             {
@@ -92,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements RecycleViewListen
     @Override
     public void OnItemClickListener(View v, int position) {
         Toast.makeText(MainActivity.this, ((City)adapter.getItem(position)).name_cn, Toast.LENGTH_SHORT).show();
+
+        startActivity(WeatherDetailActivity.getIntent(this,(City) adapter.getItem(position)));
     }
 
     @Override

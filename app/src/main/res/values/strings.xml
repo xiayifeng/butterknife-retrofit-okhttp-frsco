@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">AppFrame</string>
+
+    <string name="weather_type">天气状态:%s</string>
+    <string name="weather_currenttmp">当前温度:%s</string>
+    <string name="weather_aqi">pm值:%s</string>
+    <string name="weather_scope">温度区间:%s</string>
 </resources>
