@@ -1,4 +1,4 @@
-package xyf.com.appframe.views;
+package xyf.com.appframe.recycleviewtools;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -65,7 +65,7 @@ public class itemDecoration extends RecyclerView.ItemDecoration {
     {
         int left = parent.getPaddingLeft();
         int right = parent.getMeasuredWidth() - parent.getPaddingRight();
-        int childsize = parent.getChildCount();
+        int childsize = parent.getChildCount() - 1;
         for (int i = 0;i<childsize;i++)
         {
             View child = parent.getChildAt(i);
