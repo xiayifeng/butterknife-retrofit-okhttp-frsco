@@ -6,6 +6,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
@@ -90,6 +93,7 @@ public class MusicPlayActivity extends AppCompatActivity{
         }
 
         setTitle(musicdata.filename);
+        filename.setVisibility(View.GONE);
 
         load();
     }
@@ -127,23 +131,36 @@ public class MusicPlayActivity extends AppCompatActivity{
     private Subscription playSubcription;
     private Subscription lrcSubcription;
 
-    private void load()
+    private void loadsinger()
     {
         singerSubcription = NetWork.getMusicSingerInfoApi().getSingerInfo(musicdata.singername)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(singerInfoObserver);
+    }
 
+    private void loadplayinfo()
+    {
         playSubcription = NetWork.getMusicPlayInfoApi().getPlayInfo(musicdata.hash)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(playInfoObserver);
+    }
 
+    private void loadlrc()
+    {
         lrcSubcription = NetWork.getMusicKrcInfoApi().getKrcInfo(musicdata.filename,musicdata.hash, "" +musicdata.duration)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(krcInfoObserver);
 
+    }
+
+    private void load()
+    {
+        loadsinger();
+        loadplayinfo();
+        loadlrc();
     }
 
     @Override
@@ -172,7 +189,7 @@ public class MusicPlayActivity extends AppCompatActivity{
 
         @Override
         public void onError(Throwable e) {
-
+            loadlrc();
         }
 
         @Override
@@ -183,6 +200,10 @@ public class MusicPlayActivity extends AppCompatActivity{
                 parser.readLRC(musicKrcInfo.mdata.content);
 
                 lrcview.setmLrcList(parser.getLrcList());
+            }
+            else
+            {
+                loadlrc();
             }
         }
     };
@@ -195,7 +216,7 @@ public class MusicPlayActivity extends AppCompatActivity{
 
         @Override
         public void onError(Throwable e) {
-
+            loadsinger();
         }
 
         @Override
@@ -208,6 +229,10 @@ public class MusicPlayActivity extends AppCompatActivity{
 
                 bg.setController(draweeController);
             }
+            else
+            {
+                loadsinger();
+            }
         }
     };
 
@@ -219,7 +244,7 @@ public class MusicPlayActivity extends AppCompatActivity{
 
         @Override
         public void onError(Throwable e) {
-
+            loadplayinfo();
         }
 
         @Override
@@ -230,6 +255,10 @@ public class MusicPlayActivity extends AppCompatActivity{
                 currentTime.setText("00:00");
                 totaltime.setText(TImeUtils.secToTime((int) musicPlayInfo.mdata.timeLength));
                 startService(MusicPlayService.getStartIntent(MusicPlayActivity.this,musicPlayInfo.mdata.url));
+            }
+            else
+            {
+                loadplayinfo();
             }
 
         }
@@ -257,7 +286,6 @@ public class MusicPlayActivity extends AppCompatActivity{
         {
             lrcview.setIndex(LrcUtils.lrcIndex(0,message.currenttime,message.totaltime,parser.getLrcList()));
             lrcview.invalidate();
-//            lrcview.startAnimation(AnimationUtils.loadAnimation(MusicPlayActivity.this,R.anim.anim_lrc));
         }
 
     }

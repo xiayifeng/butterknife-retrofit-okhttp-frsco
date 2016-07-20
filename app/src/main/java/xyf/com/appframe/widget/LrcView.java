@@ -53,7 +53,6 @@ public class LrcView extends android.widget.TextView {
         currentPaint = new Paint();
         currentPaint.setAntiAlias(true);    //设置抗锯齿，让文字美观饱满
         currentPaint.setTextAlign(Paint.Align.CENTER);//设置文本对齐方式
-
         //非高亮部分
         notCurrentPaint = new Paint();
         notCurrentPaint.setAntiAlias(true);
@@ -76,7 +75,7 @@ public class LrcView extends android.widget.TextView {
 //        notCurrentPaint.setColor(Color.argb(140, 255, 255, 255));
 
         currentPaint.setColor(Color.BLUE);
-        notCurrentPaint.setColor(Color.BLACK);
+        notCurrentPaint.setColor(Color.argb(100,0,0,0));
 
         currentPaint.setTextSize(getResources().getDimension(R.dimen.lrc_current_size));
         currentPaint.setTypeface(Typeface.SERIF);
@@ -103,7 +102,7 @@ public class LrcView extends android.widget.TextView {
                 canvas.drawText(mLrcList.get(i).getLrcStr(), width / 2, tempY, notCurrentPaint);
             }
         } catch (Exception e) {
-            setText("...木有歌词文件，赶紧去下载...");
+            setText("正在下载歌词...");
         }
     }
 
