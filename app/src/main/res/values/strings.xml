@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">AppFrame</string>
+    <string name="app_weather">天气</string>
+    <string name="app_music">音乐</string>
 
     <string name="weather_type">天气状态:%s</string>
     <string name="weather_currenttmp">当前温度:%s</string>
