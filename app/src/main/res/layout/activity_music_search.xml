@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_margin="15sp"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/music_search_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:layout_marginTop="5dp"
+        android:text="search"
+        android:layout_below="@+id/music_search_input"
+        android:id="@+id/music_search_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.jude.easyrecyclerview.EasyRecyclerView
+        android:layout_below="@+id/music_search_btn"
+        android:id="@+id/music_search_rv"
+        android:layout_marginTop="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"></com.jude.easyrecyclerview.EasyRecyclerView>
+
+</RelativeLayout>

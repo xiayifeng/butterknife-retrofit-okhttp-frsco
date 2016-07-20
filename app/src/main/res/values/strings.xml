@@ -5,4 +5,11 @@
     <string name="weather_currenttmp">当前温度:%s</string>
     <string name="weather_aqi">pm值:%s</string>
     <string name="weather_scope">温度区间:%s</string>
+
+
+    <string name="music_filename">歌名:%s</string>
+    <string name="music_signername">歌手:%s</string>
+    <string name="music_albumname">专辑:%s</string>
+    <string name="music_duration">时长:%s</string>
+    <string name="music_filesize">大小:%s</string>
 </resources>

@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements RecycleViewListen
     @OnClick(R.id.edit_btn)
     public void onsearch()
     {
-        if (mSubscription != null && mSubscription.isUnsubscribed())
+        if (mSubscription != null && !mSubscription.isUnsubscribed())
         {
             mSubscription.unsubscribe();
         }

@@ -29,6 +29,33 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <activity android:name="xyf.com.appframe.MusicSearchActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="navigation|orientation|screenSize|keyboardHidden"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="xyf.com.appframe.MusicPlayActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="navigation|orientation|screenSize|keyboardHidden"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        
+        <service android:name="xyf.com.appframe.MusicPlayService" >
+
+        </service>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
