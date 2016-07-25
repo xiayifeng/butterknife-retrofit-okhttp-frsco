@@ -77,6 +77,8 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
             mediaPlayer.setOnBufferingUpdateListener(this);
 
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+            mediaPlayer.setLooping(true);
         }
     }
 
@@ -170,16 +172,23 @@ public class MusicPlayService extends Service implements MediaPlayer.OnCompletio
             mediaPlayer.stop();
             stopTimer();
         }
+        else
+        {
+            resume();
+        }
     }
 
     private void resume()
     {
-        if (mediaPlayer != null)
+        if (mediaPlayer != null && !mediaPlayer.isPlaying())
         {
             mediaPlayer.start();
             sendMessage(buffedprecent,100 * mediaPlayer.getCurrentPosition() / mediaPlayer.getDuration(),
                     mediaPlayer.isPlaying() ? 1 : 0,mediaPlayer.getCurrentPosition());
             startTimer();
+        }else
+        {
+            stop();
         }
     }
 
