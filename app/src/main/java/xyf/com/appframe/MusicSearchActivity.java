@@ -78,6 +78,7 @@ public class MusicSearchActivity extends AppCompatActivity implements RecyclerAr
     {
         SoftInputUtils.hideSoftInput(MusicSearchActivity.this);
         adapter.clear();
+        pageno = 1;
         ProgressDialogUtils.showProgress(MusicSearchActivity.this);
         searchkey = input.getText().toString().trim();
         setTitle(searchkey);
