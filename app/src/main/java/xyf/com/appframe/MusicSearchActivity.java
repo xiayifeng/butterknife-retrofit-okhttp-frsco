@@ -1,14 +1,22 @@
 package xyf.com.appframe;
 
+import android.app.ActivityOptions;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.transition.Explode;
 import android.view.View;
+import android.view.Window;
 import android.widget.EditText;
 
 import com.jude.easyrecyclerview.EasyRecyclerView;
 import com.jude.easyrecyclerview.adapter.RecyclerArrayAdapter;
+import com.kogitune.activity_transition.ActivityTransitionLauncher;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -23,11 +31,12 @@ import xyf.com.appframe.javabean.MusicSearchResult;
 import xyf.com.appframe.network.NetWork;
 import xyf.com.appframe.recycleviewtools.ProgressDialogUtils;
 import xyf.com.appframe.recycleviewtools.SoftInputUtils;
+import xyf.com.appframe.widget.MotionRecyclerViewItemClickListener;
 
 /**
  * Created by sh-xiayf on 16/7/19.
  */
-public class MusicSearchActivity extends AppCompatActivity implements RecyclerArrayAdapter.OnItemClickListener{
+public class MusicSearchActivity extends AppCompatActivity implements MotionRecyclerViewItemClickListener{
 
     @BindView(R.id.music_search_input)
     EditText input;
@@ -40,6 +49,8 @@ public class MusicSearchActivity extends AppCompatActivity implements RecyclerAr
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+
         setContentView(R.layout.activity_music_search);
         ButterKnife.bind(this);
 
@@ -132,8 +143,8 @@ public class MusicSearchActivity extends AppCompatActivity implements RecyclerAr
     };
 
     @Override
-    public void onItemClick(int position) {
-        startActivity(MusicPlayActivity.getIntent(this,adapter.getItem(position)));
+    public void onItemClick(int position, View[] views) {
+        ActivityTransitionLauncher.with(this).from(views[0]).launch(MusicPlayActivity.getIntent(this,adapter.getItem(position)));
     }
 }
 

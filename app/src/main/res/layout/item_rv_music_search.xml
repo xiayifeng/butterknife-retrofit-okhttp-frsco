@@ -13,74 +13,87 @@
         android:layout_height="wrap_content">
 
         <LinearLayout
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <RelativeLayout
-                android:layout_marginTop="10dp"
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/music_play_bg"
+                android:layout_marginLeft="5dp"
+                android:layout_gravity="center_vertical"
+                android:layout_width="80dp"
+                android:layout_height="80dp" />
+
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <TextView
-                    android:ellipsize="end"
-                    android:singleLine="true"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_alignParentLeft="true"
-                    android:text="歌名:陈奕迅 - 十年"
-                    android:id="@+id/music_search_filename"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                <RelativeLayout
+                    android:layout_marginTop="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-                <TextView
-                    android:layout_marginLeft="10dp"
+                    <TextView
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_alignParentLeft="true"
+                        android:text="歌名:陈奕迅 - 十年"
+                        android:id="@+id/music_search_filename"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_below="@+id/music_search_filename"
+                        android:text="歌手:陈奕迅"
+                        android:id="@+id/music_search_singername"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:layout_marginTop="5dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_below="@+id/music_search_singername"
+                        android:text="专辑:黑白灰"
+                        android:id="@+id/music_search_album_name"
+                        android:layout_alignParentLeft="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:layout_marginTop="5dp"
-                    android:layout_below="@+id/music_search_filename"
-                    android:text="歌手:陈奕迅"
-                    android:id="@+id/music_search_singername"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_marginBottom="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-                <TextView
-                    android:layout_marginTop="5dp"
-                    android:ellipsize="end"
-                    android:singleLine="true"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_below="@+id/music_search_singername"
-                    android:text="专辑:黑白灰"
-                    android:id="@+id/music_search_album_name"
-                    android:layout_alignParentLeft="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    <TextView
+                        android:text="时长:1分钟"
+                        android:layout_marginLeft="10dp"
+                        android:layout_alignParentLeft="true"
+                        android:id="@+id/music_search_duration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
 
-            </RelativeLayout>
+                    <TextView
+                        android:id="@+id/music_search_filesize"
+                        android:text="大小:3M"
+                        android:layout_marginRight="10dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
 
-            <RelativeLayout
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                </RelativeLayout>
 
-                <TextView
-                    android:text="时长:1分钟"
-                    android:layout_marginLeft="10dp"
-                    android:layout_alignParentLeft="true"
-                    android:id="@+id/music_search_duration"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:id="@+id/music_search_filesize"
-                    android:text="大小:3M"
-                    android:layout_marginRight="10dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-            </RelativeLayout>
-
+            </LinearLayout>
         </LinearLayout>
 
     </android.support.v7.widget.CardView>

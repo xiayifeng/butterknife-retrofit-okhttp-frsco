@@ -2,9 +2,12 @@ package xyf.com.appframe;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Animatable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -15,10 +18,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.drawee.controller.ControllerListener;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
+import com.kogitune.activity_transition.ActivityTransition;
+import com.kogitune.activity_transition.ActivityTransitionLauncher;
+import com.kogitune.activity_transition.ExitActivityTransition;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -95,8 +104,13 @@ public class MusicPlayActivity extends AppCompatActivity{
         setTitle(musicdata.filename);
         filename.setVisibility(View.GONE);
 
+        exitActivityTransition = ActivityTransition.with(getIntent()).to(bg).start(savedInstanceState);
+
+
         load();
     }
+
+    private ExitActivityTransition exitActivityTransition;
 
     private static int playingstatus;
 
@@ -133,10 +147,55 @@ public class MusicPlayActivity extends AppCompatActivity{
 
     private void loadsinger()
     {
-        singerSubcription = NetWork.getMusicSingerInfoApi().getSingerInfo(musicdata.singername)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(singerInfoObserver);
+//        singerSubcription = NetWork.getMusicSingerInfoApi().getSingerInfo(musicdata.singername)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(singerInfoObserver);
+
+        ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(musicdata.singerurl)).build();
+
+        ControllerListener controllerListener = new BaseControllerListener<ImageInfo>(){
+            @Override
+            public void onSubmit(String id, Object callerContext) {
+                super.onSubmit(id, callerContext);
+            }
+
+            @Override
+            public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
+                super.onFinalImageSet(id, imageInfo, animatable);
+                loadplayinfo();
+                loadlrc();
+            }
+
+            @Override
+            public void onIntermediateImageSet(String id, ImageInfo imageInfo) {
+                super.onIntermediateImageSet(id, imageInfo);
+            }
+
+            @Override
+            public void onIntermediateImageFailed(String id, Throwable throwable) {
+                super.onIntermediateImageFailed(id, throwable);
+            }
+
+            @Override
+            public void onFailure(String id, Throwable throwable) {
+                super.onFailure(id, throwable);
+                loadplayinfo();
+                loadlrc();
+            }
+
+            @Override
+            public void onRelease(String id) {
+                super.onRelease(id);
+            }
+        };
+
+        DraweeController draweeController = Fresco.newDraweeControllerBuilder().
+                setImageRequest(imageRequest)
+                .setControllerListener(controllerListener)
+                .build();
+
+        bg.setController(draweeController);
     }
 
     private void loadplayinfo()
@@ -159,8 +218,11 @@ public class MusicPlayActivity extends AppCompatActivity{
     private void load()
     {
         loadsinger();
-        loadplayinfo();
-        loadlrc();
+    }
+
+    @Override
+    public void onBackPressed() {
+        exitActivityTransition.exit(this);
     }
 
     @Override

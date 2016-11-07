@@ -17,6 +17,7 @@ public class MusicSearchResultDataData implements Parcelable{
     public String album_name;
     public String singername;
     public String hash;
+    public String singerurl;
 
     protected MusicSearchResultDataData(Parcel in) {
         filename = in.readString();
@@ -29,6 +30,7 @@ public class MusicSearchResultDataData implements Parcelable{
         album_name = in.readString();
         singername = in.readString();
         hash = in.readString();
+        singerurl = in.readString();
     }
 
     @Override
@@ -43,6 +45,7 @@ public class MusicSearchResultDataData implements Parcelable{
         dest.writeString(album_name);
         dest.writeString(singername);
         dest.writeString(hash);
+        dest.writeString(singerurl);
     }
 
     @Override
