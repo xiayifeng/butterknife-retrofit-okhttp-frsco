@@ -1,39 +1,27 @@
-# 工作流名称
 name: Auto Update README and Commit to feature/test
 
-# 触发器：1. 定时触发（每月25号）；2. 手动触发（方便测试）
 on:
-  # 定时触发：UTC 时间每月25号 0 点（对应北京时间 8 点，可根据需求调整时区）
-  # 语法：cron: "分 时 日 月 周"（UTC时区）
-  # 即 UTC 24 号 16 点 = 北京时间 25 号 0 点）
   schedule:
-    - cron: "0 16 24 * *"
-  # 手动触发（在 GitHub 仓库的 Actions 页面可点击“Run workflow”触发）
+    - cron: "0 0 25 * *" # UTC 时间每月25号0点
   workflow_dispatch:
 
-# 工作流任务（单个任务：更新README + 提交推送）
 jobs:
   update-readme:
-    # 运行环境：选择 Ubuntu 最新版（稳定且兼容性好）
     runs-on: ubuntu-latest
     steps:
-      # 步骤1：拉取仓库代码（必须，否则无法操作文件）
       - name: Checkout repository code
         uses: actions/checkout@v4
         with:
-          # 切换到目标分支 feature/test
           ref: master
-          # 开启 sparse-checkout（可选，仅拉取必要文件，加快速度）
-          sparse-checkout: |
-            README.md
-          # 配置 Git 用户名和邮箱（用于后续提交）
-          persist-credentials: false # 禁用默认凭据，使用自定义 PAT
+          # 移除 sparse-checkout：若 README 不存在，sparse-checkout 会导致无法创建新文件
+          # sparse-checkout: |
+          #   README.md
+          persist-credentials: false
 
-      # 步骤2：配置 Git 身份（提交时需要显示的作者信息）
       - name: Configure Git identity
         run: |
-          git config --global user.name "yifengxia" # 用户名（可自定义）
-          git config --global user.email "441740874@qq.com" # 邮箱（可自定义）
+          git config --global user.name "yifengXia"
+          git config --global user.email "441740874#qq.com"
 
       # 修复核心：兼容 README 存在/不存在的场景，开启错误检测
       - name: Update or create README.md
@@ -54,7 +42,6 @@ jobs:
             echo "README.md 不存在，已新建文件并写入初始内容"
           fi
 
-      # 步骤4：检查文件是否有变更（避免无变更时提交空 commit）
       - name: Check if README has changes
         id: check_changes
         run: |
@@ -64,16 +51,11 @@ jobs:
             echo "changes=true" >> $GITHUB_OUTPUT
           fi
 
-      # 步骤5：提交变更并推送到 feature/test 分支（仅当文件有变更时执行）
       - name: Commit and push changes
-        if: steps.check_changes.outputs.changes == 'true' # 条件判断：仅变更时执行
+        if: steps.check_changes.outputs.changes == 'true'
         run: |
-          # 添加文件到暂存区
           git add README.md
-          # 提交（备注包含日期，便于追溯）
           git commit -m "chore: auto update README on $(date +'%Y-%m-%d')"
-          # 推送（使用 PAT 授权，避免权限问题）
           git push https://${{ secrets.AUTO_COMMIT_PAT }}@github.com/${{ github.repository }}.git HEAD:feature/test
         env:
-          # 引用仓库 Secrets 中的 PAT（需提前配置，见“前置准备3”）
           AUTO_COMMIT_PAT: ${{ secrets.AUTO_COMMIT_PAT }}
