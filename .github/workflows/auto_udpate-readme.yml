@@ -73,25 +73,25 @@ jobs:
       - name: Commit and push changes
         run: |
           set -e
-          # 确保文件存在再提交
-          if [ ! -f "README.md" ]; then
-            echo "❌ README.md 不存在，终止提交"
+          # 配置本地用户信息
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          
+          # 捕获 commit 错误
+          if ! git commit -m "chore: auto create README on $(date +'%Y-%m-%d')"; then
+            echo "❌ git commit 失败，错误信息："
+            git status  # 查看暂存状态
             exit 1
           fi
-          # 添加文件（强制添加，避免未跟踪问题）
-          git add README.md || echo "⚠️ git add 失败，查看 Git 状态：" && git status && exit 1
-          # 提交（备注包含详细时间）
-          git commit -m "chore: force create README on $(date +'%Y-%m-%d %H:%M:%S')" || {
-            echo "⚠️ 提交失败（可能无变更），查看 Git 状态："
-            git status
-            exit 0  # 无变更时不报错，正常退出
-          }
-          # 推送（用 PAT 授权，打印推送日志）
-          echo "=== 开始推送至 feature/test 分支 ==="
-          git push https://${{ secrets.AUTO_COMMIT_PAT }}@github.com/${{ github.repository }}.git HEAD:feature/test || {
-            echo "❌ 推送失败，查看错误信息："
-            git remote -v  # 确认远程仓库地址是否正确
+          
+          # 捕获 push 错误
+          if ! git push https://${{ secrets.AUTO_COMMIT_PAT }}@github.com/${{ github.repository }}.git HEAD:master --verbose; then
+            echo "❌ git push 失败，错误信息："
+            # 打印 HTTP 响应（定位权限/分支保护问题）
+            curl -I https://github.com/${{ github.repository }}.git
             exit 1
-          }
+          fi
+          
+          echo "✅ 提交并推送成功！"
         env:
           AUTO_COMMIT_PAT: ${{ secrets.AUTO_COMMIT_PAT }}
