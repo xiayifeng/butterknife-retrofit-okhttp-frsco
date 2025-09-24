@@ -1,97 +1,81 @@
-name: Auto Update README and Commit to feature/test
+name: Auto Update README and Commit to master
 
 on:
   schedule:
-    - cron: "0 0 25 * *"
+    - cron: "0 0 25 * *" # UTC 时间每月25号0点
   workflow_dispatch:
 
 jobs:
   update-readme:
     runs-on: ubuntu-latest
     steps:
-      # 步骤1：拉取代码（保留完整工作区，不限制 sparse-checkout）
       - name: Checkout repository code
         uses: actions/checkout@v4
         with:
-          ref: master  # 确保切换到目标分支
-          persist-credentials: false  # 禁用默认凭据，用 PAT
-          fetch-depth: 0  # 拉取完整历史（避免浅克隆导致的权限问题）
+          ref: master # 切换到 master 分支
+          persist-credentials: false
+          fetch-depth: 0 # 拉取完整历史，避免浅克隆问题
 
-      # 步骤2：打印初始状态日志（关键：排查分支是否正确、工作区是否有文件）
-      - name: Log initial workspace status
+      - name: Configure Git identity (local repo)
         run: |
-          echo "=== 当前分支 ==="
-          git branch --show-current  # 确认是否在 feature/test 分支
-          echo "=== 工作区文件列表 ==="
-          ls -la  # 查看当前目录所有文件（包括隐藏文件）
-          echo "=== Git 状态 ==="
-          git status  # 查看 Git 跟踪状态
-          echo "=== 工作区权限 ==="
-          ls -ld .  # 查看当前目录权限（确保有写入权限）
+          # 配置当前仓库的用户信息（优先级高于全局，确保提交有效）
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          # 验证配置是否生效
+          echo "✅ Git 用户名：$(git config user.name)"
+          echo "✅ Git 邮箱：$(git config user.email)"
 
-      # 步骤3：配置 Git 身份
-      - name: Configure Git identity
+      - name: Force create README.md (确保文件生成)
         run: |
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
-
-      # 步骤4：创建/更新 README（简化逻辑，确保文件一定生成）
-      - name: Force create/update README.md (simplified logic)
-        run: |
-          set -e  # 错误立即终止，便于排查
-          echo "=== 开始创建/更新 README.md ==="
-          # 直接覆盖/创建文件（不依赖原有文件，确保一定生成）
+          set -e
+          # 直接创建/覆盖 README.md，避免依赖原有文件
           echo "# 自动更新测试" > README.md
           echo "" >> README.md
           echo "最后更新时间：$(date +'%Y-%m-%d %H:%M:%S %Z')" >> README.md
           echo "这是 GitHub Actions 自动生成的文件" >> README.md
           
-          # 打印文件创建结果（关键：确认文件是否真的生成）
-          echo "=== 文件创建结果 ==="
+          # 验证文件是否生成
           if [ -f "README.md" ]; then
-            echo "✅ README.md 已创建成功！"
-            echo "文件内容："
-            cat README.md  # 打印文件内容，确认是否正确
+            echo "✅ README.md 生成成功，文件内容："
+            cat README.md
           else
-            echo "❌ README.md 未创建！"
-            exit 1  # 强制失败，避免后续步骤无意义执行
+            echo "❌ README.md 生成失败！"
+            exit 1
           fi
 
-      # 步骤5：查看 Git 对新文件的识别状态
-      - name: Log Git status after creating README
+      - name: Stage README.md (关键：添加到 Git 暂存区)
         run: |
-          echo "=== 创建 README 后的 Git 状态 ==="
-          git status  # 查看 README.md 是否在“Untracked files”中
-          echo "=== 查看 .gitignore 配置（排除忽略问题） ==="
-          if [ -f ".gitignore" ]; then
-            cat .gitignore  # 查看是否忽略了 README.md
+          set -e
+          # 执行 git add，确保文件被暂存
+          git add README.md
+          
+          # 验证暂存结果：检查文件是否在暂存区
+          if git diff --cached --quiet README.md; then
+            echo "❌ README.md 暂存失败（未在暂存区）"
+            git status # 打印 Git 状态，辅助排查
+            exit 1
           else
-            echo "✅ .gitignore 文件不存在，无忽略规则"
+            echo "✅ README.md 已成功暂存到 Git 暂存区"
+            git status # 打印状态，确认暂存结果
           fi
 
-      # 步骤6：提交推送（仅当文件存在时执行）
       - name: Commit and push changes
         run: |
           set -e
-          # 配置本地用户信息
-          git config user.name "GitHub Actions Bot"
-          git config user.email "actions@github.com"
-          
-          # 捕获 commit 错误
+          # 1. 执行提交（确保有暂存文件）
           if ! git commit -m "chore: auto create README on $(date +'%Y-%m-%d')"; then
-            echo "❌ git commit 失败，错误信息："
-            git status  # 查看暂存状态
+            echo "❌ git commit 失败，检查是否有暂存文件："
+            git status
             exit 1
           fi
-          
-          # 捕获 push 错误
+          echo "✅ git commit 成功！"
+
+          # 2. 执行推送（使用 PAT 授权，添加详细日志）
+          echo "✅ 开始推送至 master 分支..."
           if ! git push https://${{ secrets.AUTO_COMMIT_PAT }}@github.com/${{ github.repository }}.git HEAD:master --verbose; then
-            echo "❌ git push 失败，错误信息："
-            # 打印 HTTP 响应（定位权限/分支保护问题）
-            curl -I https://github.com/${{ github.repository }}.git
+            echo "❌ git push 失败，错误信息如上"
             exit 1
           fi
-          
-          echo "✅ 提交并推送成功！"
+          echo "✅ 推送成功！README.md 已更新到 master 分支"
         env:
           AUTO_COMMIT_PAT: ${{ secrets.AUTO_COMMIT_PAT }}
