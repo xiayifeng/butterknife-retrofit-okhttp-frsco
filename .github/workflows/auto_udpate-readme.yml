@@ -2,60 +2,96 @@ name: Auto Update README and Commit to feature/test
 
 on:
   schedule:
-    - cron: "0 0 25 * *" # UTC 时间每月25号0点
+    - cron: "0 0 25 * *"
   workflow_dispatch:
 
 jobs:
   update-readme:
     runs-on: ubuntu-latest
     steps:
+      # 步骤1：拉取代码（保留完整工作区，不限制 sparse-checkout）
       - name: Checkout repository code
         uses: actions/checkout@v4
         with:
-          ref: master
-          # 移除 sparse-checkout：若 README 不存在，sparse-checkout 会导致无法创建新文件
-          # sparse-checkout: |
-          #   README.md
-          persist-credentials: false
+          ref: master  # 确保切换到目标分支
+          persist-credentials: false  # 禁用默认凭据，用 PAT
+          fetch-depth: 0  # 拉取完整历史（避免浅克隆导致的权限问题）
 
+      # 步骤2：打印初始状态日志（关键：排查分支是否正确、工作区是否有文件）
+      - name: Log initial workspace status
+        run: |
+          echo "=== 当前分支 ==="
+          git branch --show-current  # 确认是否在 feature/test 分支
+          echo "=== 工作区文件列表 ==="
+          ls -la  # 查看当前目录所有文件（包括隐藏文件）
+          echo "=== Git 状态 ==="
+          git status  # 查看 Git 跟踪状态
+          echo "=== 工作区权限 ==="
+          ls -ld .  # 查看当前目录权限（确保有写入权限）
+
+      # 步骤3：配置 Git 身份
       - name: Configure Git identity
         run: |
-          git config --global user.name "yifengXia"
-          git config --global user.email "441740874#qq.com"
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
 
-      # 修复核心：兼容 README 存在/不存在的场景，开启错误检测
-      - name: Update or create README.md
+      # 步骤4：创建/更新 README（简化逻辑，确保文件一定生成）
+      - name: Force create/update README.md (simplified logic)
         run: |
-          set -e # 开启错误检测：脚本遇到错误立即终止，避免静默失败
-          # 定义新内容的头部（包含更新时间）
-          NEW_CONTENT_HEADER="# 自动更新测试\n\n最后更新时间：$(date +'%Y-%m-%d %H:%M:%S %Z')\n\n"
+          set -e  # 错误立即终止，便于排查
+          echo "=== 开始创建/更新 README.md ==="
+          # 直接覆盖/创建文件（不依赖原有文件，确保一定生成）
+          echo "# 自动更新测试" > README.md
+          echo "" >> README.md
+          echo "最后更新时间：$(date +'%Y-%m-%d %H:%M:%S %Z')" >> README.md
+          echo "这是 GitHub Actions 自动生成的文件" >> README.md
           
-          # 判断 README.md 是否存在
+          # 打印文件创建结果（关键：确认文件是否真的生成）
+          echo "=== 文件创建结果 ==="
           if [ -f "README.md" ]; then
-            # 场景1：文件存在 → 保留原有内容，追加到头部之后
-            EXISTING_CONTENT=$(cat README.md)
-            echo -e "${NEW_CONTENT_HEADER}${EXISTING_CONTENT}" > README.md
-            echo "README.md 已更新（保留原有内容）"
+            echo "✅ README.md 已创建成功！"
+            echo "文件内容："
+            cat README.md  # 打印文件内容，确认是否正确
           else
-            # 场景2：文件不存在 → 新建文件，写入初始内容
-            echo -e "${NEW_CONTENT_HEADER}这是自动生成的 README 文件，后续将每月25号更新。" > README.md
-            echo "README.md 不存在，已新建文件并写入初始内容"
+            echo "❌ README.md 未创建！"
+            exit 1  # 强制失败，避免后续步骤无意义执行
           fi
 
-      - name: Check if README has changes
-        id: check_changes
+      # 步骤5：查看 Git 对新文件的识别状态
+      - name: Log Git status after creating README
         run: |
-          if git diff --quiet README.md; then
-            echo "changes=false" >> $GITHUB_OUTPUT
+          echo "=== 创建 README 后的 Git 状态 ==="
+          git status  # 查看 README.md 是否在“Untracked files”中
+          echo "=== 查看 .gitignore 配置（排除忽略问题） ==="
+          if [ -f ".gitignore" ]; then
+            cat .gitignore  # 查看是否忽略了 README.md
           else
-            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "✅ .gitignore 文件不存在，无忽略规则"
           fi
 
+      # 步骤6：提交推送（仅当文件存在时执行）
       - name: Commit and push changes
-        if: steps.check_changes.outputs.changes == 'true'
         run: |
-          git add README.md
-          git commit -m "chore: auto update README on $(date +'%Y-%m-%d')"
-          git push https://${{ secrets.AUTO_COMMIT_PAT }}@github.com/${{ github.repository }}.git HEAD:feature/test
+          set -e
+          # 确保文件存在再提交
+          if [ ! -f "README.md" ]; then
+            echo "❌ README.md 不存在，终止提交"
+            exit 1
+          fi
+          # 添加文件（强制添加，避免未跟踪问题）
+          git add README.md || echo "⚠️ git add 失败，查看 Git 状态：" && git status && exit 1
+          # 提交（备注包含详细时间）
+          git commit -m "chore: force create README on $(date +'%Y-%m-%d %H:%M:%S')" || {
+            echo "⚠️ 提交失败（可能无变更），查看 Git 状态："
+            git status
+            exit 0  # 无变更时不报错，正常退出
+          }
+          # 推送（用 PAT 授权，打印推送日志）
+          echo "=== 开始推送至 feature/test 分支 ==="
+          git push https://${{ secrets.AUTO_COMMIT_PAT }}@github.com/${{ github.repository }}.git HEAD:feature/test || {
+            echo "❌ 推送失败，查看错误信息："
+            git remote -v  # 确认远程仓库地址是否正确
+            exit 1
+          }
         env:
           AUTO_COMMIT_PAT: ${{ secrets.AUTO_COMMIT_PAT }}
