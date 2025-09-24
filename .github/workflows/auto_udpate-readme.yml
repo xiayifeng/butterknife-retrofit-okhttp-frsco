@@ -35,14 +35,24 @@ jobs:
           git config --global user.name "yifengxia" # 用户名（可自定义）
           git config --global user.email "441740874@qq.com" # 邮箱（可自定义）
 
-      # 步骤3：更新 README 文件内容（核心逻辑，可根据需求修改）
-      - name: Update README.md content
+      # 修复核心：兼容 README 存在/不存在的场景，开启错误检测
+      - name: Update or create README.md
         run: |
-          # 示例1：在 README 开头添加“最后更新时间”（推荐，直观可见）
-          echo -e "# 自动更新测试\n\n最后更新时间：$(date +'%Y-%m-%d %H:%M:%S %Z')\n\n$(cat README.md)" > README.md
+          set -e # 开启错误检测：脚本遇到错误立即终止，避免静默失败
+          # 定义新内容的头部（包含更新时间）
+          NEW_CONTENT_HEADER="# 自动更新测试\n\n最后更新时间：$(date +'%Y-%m-%d %H:%M:%S %Z')\n\n"
           
-          # 示例2：仅在 README 末尾追加更新记录（根据需求二选一）
-          # echo -e "\n## 自动更新记录\n- $(date +'%Y-%m-%d')：月度自动更新" >> README.md
+          # 判断 README.md 是否存在
+          if [ -f "README.md" ]; then
+            # 场景1：文件存在 → 保留原有内容，追加到头部之后
+            EXISTING_CONTENT=$(cat README.md)
+            echo -e "${NEW_CONTENT_HEADER}${EXISTING_CONTENT}" > README.md
+            echo "README.md 已更新（保留原有内容）"
+          else
+            # 场景2：文件不存在 → 新建文件，写入初始内容
+            echo -e "${NEW_CONTENT_HEADER}这是自动生成的 README 文件，后续将每月25号更新。" > README.md
+            echo "README.md 不存在，已新建文件并写入初始内容"
+          fi
 
       # 步骤4：检查文件是否有变更（避免无变更时提交空 commit）
       - name: Check if README has changes
